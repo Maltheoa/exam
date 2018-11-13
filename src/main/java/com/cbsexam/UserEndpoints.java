@@ -19,6 +19,7 @@ import utils.Log;
 public class UserEndpoints {
 
   UserCache userCache = new UserCache();
+  UserController userController = new UserController();
 
   /**
    * @param idUser
@@ -88,17 +89,42 @@ public class UserEndpoints {
   @POST
   @Path("/login")
   @Consumes(MediaType.APPLICATION_JSON)
-  public Response loginUser(String x) {
+  public Response loginUser(String body) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+    User user = new Gson().fromJson(body, User.class);
+
+    String token = userController.login(user);
+
+    try{
+      if (token != null) {
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(token).build();
+      } else {
+        return Response.status(400).entity("Could not login").build();
+      }
+
+    } catch(Exception e) {
+      System.out.println("Error: " + e.getMessage());
+    }
+
+   return null;
   }
 
   // TODO: Make the system able to delete users
-  public Response deleteUser(String x) {
+  @POST
+  @Path("/delete/{delete}")
+  public Response deleteUser(@PathParam("delete") int idToDelete) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+    int result = UserController.deleteUser(idToDelete);
+
+    userCache.getUsers(true);
+
+    //Problematik da vi laver et database kald, vi burde i stedet
+    if(result == 1) {
+      return Response.status(200).entity("User ID " + idToDelete + "was deleted").build();
+    } else {
+      return Response.status(400).entity("Could not delete user").build();
+    }
+
   }
 
   // TODO: Make the system able to update users

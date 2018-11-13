@@ -114,8 +114,6 @@ public class UserController {
     // Set creation time for user.
     user.setCreatedTime(System.currentTimeMillis() / 1000L);
 
-    hashing.setSalt(String.valueOf(user.getCreatedTime()));
-
     // Check for DB Connection
     if (dbCon == null) {
       dbCon = new DatabaseController();
@@ -129,7 +127,7 @@ public class UserController {
             + "', '"
             + user.getLastname()
             + "', '"
-            + hashing.hashWithSalt(user.getPassword()) //Oprettede bruger får nu hashet deres password, tjek med postman
+            + user.getPassword() //Oprettede bruger får nu hashet deres password, tjek med postman
             + "', '"
             + user.getEmail()
             + "', "
@@ -148,9 +146,23 @@ public class UserController {
     return user;
   }
 
-  public String login(String email, String password) {
+  public static int deleteUser(int idToDelete) {
 
-    Hashing hashing = new Hashing();
+    int result = -2;
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    String sql = "DELETE FROM user WHERE id =" + idToDelete;
+
+    result = dbCon.deleteUser(sql);
+
+    return  result;
+  }
+
+  public String login(User user) {
+
+
 
     // Check for connection
     if (dbCon == null) {
@@ -158,10 +170,11 @@ public class UserController {
     }
 
     // Build the query for DB
-    String sql = "SELECT * FROM user where email=" + email;
+    String sql = "SELECT * FROM user where email=" + user.getEmail() + "AND password=" + Hashing.sha(user.getPassword());
 
     ResultSet rs = dbCon.query(sql);
-    User user = null;
+    User loginUser = null;
+
 
     try {
       // Get first object, since we only have one
@@ -173,9 +186,8 @@ public class UserController {
                         rs.getString("password"),
                         rs.getString("email"),
                         rs.getLong("created_at"));
-        hashing.setSalt(String.valueOf(user.getCreatedTime()));
 
-          if (user.getPassword() == hashing.hashWithSalt(password)) {
+
             try {
               Algorithm algorithm = Algorithm.HMAC256("secret");
               token = JWT.create()
@@ -186,14 +198,30 @@ public class UserController {
             }
 
             return token;
-          }
-
-      } else {
-        System.out.println("No user found");
+          } else {
+        System.out.println("Wrong username or password");
       }
+
+
     } catch (SQLException ex) {
       System.out.println(ex.getMessage());
     }
+
+    return null;
+  }
+
+  public String delete(User user) {
+
+
+
+    Log.writeLog(UserController.class.getName(), user, "Get loggin in user", 0);
+
+    if (dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+
+
 
     return null;
   }
