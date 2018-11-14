@@ -153,4 +153,22 @@ public class DatabaseController {
 
     return result;
   }
+
+  public void voidToDB(String sql) {
+
+    if (connection == null) {
+      connection = getConnection();
+
+    }
+
+    try {
+      PreparedStatement securedstatement = connection.prepareStatement(sql);
+
+      securedstatement.executeUpdate();
+
+    } catch (SQLException e) {
+      System.out.println("Error: " + e.getMessage());
+    }
+
+  }
 }

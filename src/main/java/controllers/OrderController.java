@@ -1,5 +1,6 @@
 package controllers;
 
+import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -137,39 +138,71 @@ public class OrderController {
 
     // TODO: Enable transactions in order for us to not save the order if somethings fails for some of the other inserts.
 
+    Connection connection = null;
+
     // Insert the product in the DB
-    int orderID = dbCon.insert(
-        "INSERT INTO orders(user_id, billing_address_id, shipping_address_id, order_total, created_at, updated_at) VALUES("
-            + order.getCustomer().getId()
-            + ", "
-            + order.getBillingAddress().getId()
-            + ", "
-            + order.getShippingAddress().getId()
-            + ", "
-            + order.calculateOrderTotal()
-            + ", "
-            + order.getCreatedAt()
-            + ", "
-            + order.getUpdatedAt()
-            + ")");
 
-    if (orderID != 0) {
-      //Update the productid of the product before returning
-      order.setId(orderID);
+    //indsætter try catch
+
+    try {
+
+      connection.setAutoCommit(false);
+
+      int orderID = dbCon.insert(
+              "INSERT INTO orders(user_id, billing_address_id, shipping_address_id, order_total, created_at, updated_at) VALUES("
+                      + order.getCustomer().getId()
+                      + ", "
+                      + order.getBillingAddress().getId()
+                      + ", "
+                      + order.getShippingAddress().getId()
+                      + ", "
+                      + order.calculateOrderTotal()
+                      + ", "
+                      + order.getCreatedAt()
+                      + ", "
+                      + order.getUpdatedAt()
+                      + ")");
+
+      if (orderID != 0) {
+        //Update the productid of the product before returning
+        order.setId(orderID);
+      }
+
+      // Create an empty list in order to go trough items and then save them back with ID
+      ArrayList<LineItem> items = new ArrayList<LineItem>();
+
+      // Save line items to database
+      for (LineItem item : order.getLineItems()) {
+        item = LineItemController.createLineItem(item, order.getId());
+        items.add(item);
+      }
+
+      order.setLineItems(items);
+
+
+      //comitter hvis ordren er gået igennem
+      connection.commit();
+
+      // Return order
+
+    } catch (SQLException e) {
+      try {
+        connection.rollback();
+
+        System.out.println("Rollback");
+      } catch (SQLException e2) {
+        //Hvis ordren ikke går igennem roller den tilbage
+        System.out.println("No rollback + " + e2.getMessage());
+        //finally, da autocommit altid skal være true
+      } finally {
+        try {
+          connection.setAutoCommit(true);
+        } catch (SQLException e3) {
+          System.out.println("Printer stack trace: ");
+          e3.printStackTrace();
+        }
+      }
     }
-
-    // Create an empty list in order to go trough items and then save them back with ID
-    ArrayList<LineItem> items = new ArrayList<LineItem>();
-
-    // Save line items to database
-    for(LineItem item : order.getLineItems()){
-      item = LineItemController.createLineItem(item, order.getId());
-      items.add(item);
-    }
-
-    order.setLineItems(items);
-
-    // Return order
     return order;
   }
 }

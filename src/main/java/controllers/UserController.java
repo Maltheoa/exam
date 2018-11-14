@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import model.User;
 import utils.Hashing;
 import utils.Log;
@@ -127,7 +129,7 @@ public class UserController {
             + "', '"
             + user.getLastname()
             + "', '"
-            + user.getPassword() //Oprettede bruger får nu hashet deres password, tjek med postman
+            + Hashing.sha(user.getPassword()) //Oprettede bruger får nu hashet deres password, tjek med postman
             + "', '"
             + user.getEmail()
             + "', "
@@ -162,7 +164,7 @@ public class UserController {
 
   public String login(User user) {
 
-
+    Log.writeLog(UserController.class.getName(), user, "Login", 0);
 
     // Check for connection
     if (dbCon == null) {
@@ -170,7 +172,9 @@ public class UserController {
     }
 
     // Build the query for DB
-    String sql = "SELECT * FROM user where email=" + user.getEmail() + "AND password=" + Hashing.sha(user.getPassword());
+    String sql = "SELECT * FROM user WHERE email= '" + user.getEmail() + "' AND password='" + Hashing.sha(user.getPassword())+"'";
+    // select from user wnere id = 1;
+    // select from user where email = 'test@example.com' AND
 
     ResultSet rs = dbCon.query(sql);
     User loginUser = null;
@@ -179,7 +183,7 @@ public class UserController {
     try {
       // Get first object, since we only have one
       if (rs.next()) {
-        user = new User(
+        loginUser = new User(
                         rs.getInt("id"),
                         rs.getString("first_name"),
                         rs.getString("last_name"),
@@ -191,7 +195,7 @@ public class UserController {
             try {
               Algorithm algorithm = Algorithm.HMAC256("secret");
               token = JWT.create()
-                      .withIssuer("auth0")
+                      .withIssuer("auth0").withClaim("userId", loginUser.id)
                       .sign(algorithm);
             } catch (JWTCreationException exception){
               //Invalid Signing configuration / Couldn't convert Claims.
@@ -210,6 +214,48 @@ public class UserController {
     return null;
   }
 
+  public static String AuthUser(User userLogin) {
+    ArrayList<User> allTheUsers = UserController.getUsers();
+
+    for(User user : allTheUsers) {
+      if (user.getEmail().equals(userLogin.getEmail())){
+
+        //hashing.LoginHashWithSalt(String.valueOf(user.getCreatedTime()));
+
+        String password = Hashing.sha(userLogin.getPassword());
+
+        if(password.equals(user.getPassword())) {
+          //hashing.setLoginSalt(String.valueOf(System.currentTimeMillis()/100L));
+
+          String token = user.getFirstname()+user.getLastname()+user.getEmail();
+
+          //token = hashing.LoginHashWithSalt(token);
+
+          updateToken(user.id,token);
+
+          return token;
+
+        }
+
+      }
+    }
+
+    return null;
+  }
+
+  private static void updateToken(int id, String token) {
+    Log.writeLog(UserController.class.getName(), token, "Updating token in database", 0);
+
+    if(dbCon == null) {
+      dbCon = new DatabaseController();
+    }
+
+    String sql = "UPDATE dis.user SET token = '" + token + "' where id = " + id;
+
+    dbCon.voidToDB(sql);
+
+  }
+/*
   public String delete(User user) {
 
 
@@ -225,4 +271,27 @@ public class UserController {
 
     return null;
   }
+
+public boolean delete(String token) {
+
+  DecodedJWT jwt = null;
+  try {
+    DecodedJWT jwtx = JWT.decode(token);
+  } catch (JWTDecodeException exception) {
+
+  }
+
+
+  //Log.writeLog(UserController.class.getName(), user, "Get loggin in user", 0);
+
+  if (dbCon == null) {
+    dbCon = new DatabaseController();
+  }
+
+
+
+
+  return null;
+}
+*/
 }
