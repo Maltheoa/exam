@@ -1,6 +1,9 @@
 package com.cbsexam;
 
 import cache.UserCache;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.interfaces.DecodedJWT;
 import com.google.gson.Gson;
 import controllers.UserController;
 import java.util.ArrayList;
@@ -110,8 +113,9 @@ public class UserEndpoints {
   }
 
   // TODO: Make the system able to delete users
+  /*
   @POST
-  @Path("/delete/{delete}")
+  @Path("/delete/{delete}/{token}")
   public Response deleteUser(@PathParam("delete") int idToDelete) {
 
     int result = UserController.deleteUser(idToDelete);
@@ -126,11 +130,70 @@ public class UserEndpoints {
     }
 
   }
+  */
+
+  @POST
+  @Path("/delete/{token}")
+  public Response deleteUser(@PathParam("token") String token) {
+
+    boolean userWasDeleted = UserController.delete(token);
+
+    userCache.getUsers(true);
+
+    DecodedJWT jwt = null;
+    try {
+      //DecodedJWT jwt = JWT.decode(token);
+      jwt = JWT.decode(token);
+
+    } catch (JWTDecodeException exception) {
+
+    }
+
+    int id = jwt.getClaim("userId").asInt();
+
+    //Problematik da vi laver et database kald, vi burde i stedet
+    if(userWasDeleted == true) {
+      return Response.status(200).entity("User ID " + id + "was deleted").build();
+    } else {
+      return Response.status(400).entity("Could not delete user").build();
+    }
+
+  }
 
   // TODO: Make the system able to update users
-  public Response updateUser(String x) {
+  @POST
+  @Path("/update")
+  @Consumes(MediaType.APPLICATION_JSON)
+  public Response updateUser(String body) {
 
-    // Return a response with status 200 and JSON as type
-    return Response.status(400).entity("Endpoint not implemented yet").build();
+    User user = new Gson().fromJson(body, User.class);
+
+    String token = user.getToken();
+
+    User updatedUser = userController.update(user, token);
+
+    /*
+    try{
+      if (token != null) {
+        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(token).build();
+      } else {
+        return Response.status(400).entity("Could not update").build();
+      }
+
+    } catch(Exception e) {
+      System.out.println("Error: " + e.getMessage());
+    }
+    */
+
+    String json = new Gson().toJson(updatedUser);
+
+    // Return the data to the user
+    if (updatedUser != null) {
+      // Return a response with status 200 and JSON as type
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    } else {
+      return Response.status(400).entity("Could not create user").build();
+    }
   }
+
 }

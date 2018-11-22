@@ -9,7 +9,8 @@ import org.bouncycastle.util.encoders.Hex;
 
 public final class Hashing {
 
-  private String salt;
+  private String loginSalt;
+  private String passwordSalt;
 
   // TODO: You should add a salt and make this secure
   public static String md5(String rawString) {
@@ -48,7 +49,6 @@ public final class Hashing {
       MessageDigest digest = MessageDigest.getInstance("SHA-256");
 
       //
-      rawString = rawString + User.getCreatedTime();
 
       // We convert to byte array
       byte[] hash = digest.digest(rawString.getBytes(StandardCharsets.UTF_8));
@@ -65,14 +65,28 @@ public final class Hashing {
 
     return rawString;
   }
- /*
-  public void setSalt(String salt) {this.salt = salt;}
 
-  public String hashWithSalt(String str) {
+  public void setLoginSalt(String loginSalt) {this.loginSalt = loginSalt;}
+  public void setPasswordSalt(String passwordSalt) {this.passwordSalt = passwordSalt;}
 
-    String salt = str+this.salt;
+  public String hashTokenWithSalt(String str) {
 
-    return md5(salt);
+    String salt = str+this.loginSalt;
+
+    return sha(salt);
   }
-  */
+
+  public String hashPasswordWithSalt(String str) {
+
+    String salt = str+this.passwordSalt;
+
+    return sha(salt);
+  }
+
+  public String hashPasswordWithUnSetSalt(String salt, String password) {
+
+    String saltedPassword = sha(salt+password);
+
+    return  saltedPassword;
+  }
 }
