@@ -193,7 +193,7 @@ public class UserController {
                 try {
                     Algorithm algorithm = Algorithm.HMAC256("secret");
                     token = JWT.create()
-                            .withIssuer("auth0").withClaim("userId", loginUser.id)
+                            .withIssuer("auth0").withClaim("userId", loginUser.id).withClaim("createdAt", loginUser.getCreatedTime() )
                             .sign(algorithm);
                 } catch (JWTCreationException exception) {
                     //Invalid Signing configuration / Couldn't convert Claims.
@@ -337,7 +337,7 @@ public class UserController {
             postedUser.setPassword(jwt.getClaim("password").asString());
         } else {
 
-            String salt = String.valueOf(jwt.getClaim("created_At").asLong());
+            String salt = String.valueOf(jwt.getClaim("created_at").asLong());
             System.out.println(salt);
             hashing.setPasswordSalt(String.valueOf(jwt.getClaim("created_at").asLong()));
             String hashedPassword = hashing.hashPasswordWithSalt(postedUser.getPassword());

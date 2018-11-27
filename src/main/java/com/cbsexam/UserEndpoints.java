@@ -41,8 +41,14 @@ public class UserEndpoints {
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the user with the status code 200
-    // TODO: What should happen if something breaks down?
-    return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    // TODO: What should happen if something breaks down? - FIXED
+    if (user != null) {
+      return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(json).build();
+    }else {
+      return Response.status(400).entity("Could not find user").build();
+    }
+
+
   }
 
   /** @return Responses */
@@ -88,7 +94,7 @@ public class UserEndpoints {
     }
   }
 
-  // TODO: Make the system able to login users and assign them a token to use throughout the system.
+  // TODO: Make the system able to login users and assign them a token to use throughout the system - FIXED
   @POST
   @Path("/login")
   @Consumes(MediaType.APPLICATION_JSON)
@@ -112,7 +118,7 @@ public class UserEndpoints {
    return null;
   }
 
-  // TODO: Make the system able to delete users
+  // TODO: Make the system able to delete users - FIXED
   /*
   @POST
   @Path("/delete/{delete}/{token}")
@@ -153,7 +159,7 @@ public class UserEndpoints {
 
     //Problematik da vi laver et database kald, vi burde i stedet
     if(userWasDeleted == true) {
-      return Response.status(200).entity("User ID " + id + "was deleted").build();
+      return Response.status(200).entity("User ID " + id + " was deleted").build();
     } else {
       return Response.status(400).entity("Could not delete user").build();
     }

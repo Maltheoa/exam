@@ -12,7 +12,7 @@ public final class Hashing {
   private String loginSalt;
   private String passwordSalt;
 
-  // TODO: You should add a salt and make this secure
+  // TODO: You should add a salt and make this secure - FIXED
   public static String md5(String rawString) {
     try {
 
@@ -42,7 +42,7 @@ public final class Hashing {
     return null;
   }
 
-  // TODO: You should add a salt and make this secure
+  // TODO: You should add a salt and make this secure - FIXED (MAKE SURE IT IS CORRECTLY FIXED)
   public static String sha(String rawString) {
     try {
       // We load the hashing algoritm we wish to use.
