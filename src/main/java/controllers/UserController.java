@@ -5,14 +5,13 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import cache.UserCache;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.exceptions.JWTCreationException;
 import com.auth0.jwt.exceptions.JWTDecodeException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import model.User;
-import utils.Hashing;
+import utils.*;
 import utils.Log;
 
 public class UserController {
@@ -20,8 +19,6 @@ public class UserController {
     String token = null;
 
     private static DatabaseController dbCon;
-
-    private static UserCache userCache = new UserCache();
 
     public UserController() {
         dbCon = new DatabaseController();
@@ -218,67 +215,6 @@ public class UserController {
 
         return null;
     }
-  /*
-
-  public static String authUser(User userLogin) {
-    ArrayList<User> allTheUsers = UserController.getUsers();
-
-    for(User user : allTheUsers) {
-      if (user.getEmail().equals(userLogin.getEmail())){
-
-        hashing.LoginHashWithSalt(String.valueOf(user.getCreatedTime()));
-
-        String password = Hashing.sha(userLogin.getPassword());
-
-        if(password.equals(user.getPassword())) {
-          //hashing.setLoginSalt(String.valueOf(System.currentTimeMillis()/100L));
-
-          String token = user.getFirstname()+user.getLastname()+user.getEmail();
-
-          //token = hashing.LoginHashWithSalt(token);
-
-          updateToken(user.id,token);
-
-          return token;
-
-        }
-
-      }
-    }
-
-    return null;
-  }
-
-  private static void updateToken(int id, String token) {
-    Log.writeLog(UserController.class.getName(), token, "Updating token in database", 0);
-
-    if(dbCon == null) {
-      dbCon = new DatabaseController();
-    }
-
-    String sql = "UPDATE dis.user SET token = '" + token + "' where id = " + id;
-
-    dbCon.voidToDB(sql);
-
-  }
-
-
-  public String delete(User user) {
-
-
-
-    Log.writeLog(UserController.class.getName(), user, "Get loggin in user", 0);
-
-    if (dbCon == null) {
-      dbCon = new DatabaseController();
-    }
-
-
-
-
-    return null;
-  }
-  */
 
     public static boolean delete(String token) {
 
@@ -337,9 +273,9 @@ public class UserController {
             postedUser.setPassword(jwt.getClaim("password").asString());
         } else {
 
-            String salt = String.valueOf(jwt.getClaim("created_at").asLong());
+            String salt = String.valueOf(jwt.getClaim("createdAt").asLong());
             System.out.println(salt);
-            hashing.setPasswordSalt(String.valueOf(jwt.getClaim("created_at").asLong()));
+            hashing.setPasswordSalt(String.valueOf(jwt.getClaim("createdAt").asLong()));
             String hashedPassword = hashing.hashPasswordWithSalt(postedUser.getPassword());
             postedUser.setPassword(hashedPassword);
         }

@@ -10,6 +10,8 @@ import model.Order;
 import model.User;
 import utils.Log;
 
+import javax.xml.crypto.Data;
+
 public class OrderController {
 
   private static DatabaseController dbCon;
@@ -133,6 +135,8 @@ public class OrderController {
       dbCon = new DatabaseController();
     }
 
+
+
     // Save addresses to database and save them back to initial order instance
     order.setBillingAddress(AddressController.createAddress(order.getBillingAddress()));
     order.setShippingAddress(AddressController.createAddress(order.getShippingAddress()));
@@ -149,6 +153,7 @@ public class OrderController {
     //indsætter try catch
 
     try {
+      //Sørger for at databasen ikke kan committe indtil videre
 
       connection.setAutoCommit(false);
 
@@ -179,6 +184,9 @@ public class OrderController {
       for (LineItem item : order.getLineItems()) {
         item = LineItemController.createLineItem(item, order.getId());
         items.add(item);
+
+        //Manuelt commit af data til cb
+        DatabaseController.getConnection().commit();
       }
 
       order.setLineItems(items);

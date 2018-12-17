@@ -101,8 +101,10 @@ public class ProductController {
 
     // TODO: Use caching layer - FIXED ( SKAL TESTES)
     String sql = "SELECT * FROM product";
+    /*
     ProductCache productCache = new ProductCache();
     productCache.getProducts(true);
+    */
 
     ResultSet rs = dbCon.query(sql);
     ArrayList<Product> products = new ArrayList<Product>();

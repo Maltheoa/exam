@@ -42,7 +42,7 @@ public final class Hashing {
     return null;
   }
 
-  // TODO: You should add a salt and make this secure - FIXED (MAKE SURE IT IS CORRECTLY FIXED)
+  //  TODO: You should add a salt and make this secure - FIXED (MAKE SURE IT IS CORRECTLY FIXED)
   public static String sha(String rawString) {
     try {
       // We load the hashing algoritm we wish to use.
@@ -78,9 +78,9 @@ public final class Hashing {
 
   public String hashPasswordWithSalt(String str) {
 
-    String salt = str+this.passwordSalt;
+    String saltedString = str+this.passwordSalt;
 
-    return sha(salt);
+    return sha(saltedString);
   }
 
   public String hashPasswordWithUnSetSalt(String salt, String password) {

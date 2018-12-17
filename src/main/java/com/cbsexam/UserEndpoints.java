@@ -22,7 +22,7 @@ import utils.Log;
 public class UserEndpoints {
 
   UserCache userCache = new UserCache();
-  UserController userController = new UserController();
+  UserController  userController = new UserController();
 
   /**
    * @param idUser
