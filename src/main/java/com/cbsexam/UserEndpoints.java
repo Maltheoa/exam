@@ -38,6 +38,7 @@ public class UserEndpoints {
     // TODO: Add Encryption to JSON - FIXED
     // Convert the user object to json in order to return the object
     String json = new Gson().toJson(user);
+    //Adding encryption
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the user with the status code 200
@@ -65,6 +66,7 @@ public class UserEndpoints {
     // TODO: Add Encryption to JSON - FIXED
     // Transfer users to json in order to return it to the user
     String json = new Gson().toJson(users);
+    //Adding encryption
     json = Encryption.encryptDecryptXOR(json);
 
     // Return the users with the status code 200
@@ -84,6 +86,8 @@ public class UserEndpoints {
 
     // Get the user back with the added ID and return it to the user
     String json = new Gson().toJson(createUser);
+    //Adding encryption
+    json = Encryption.encryptDecryptXOR(json);
 
     // Return the data to the user
     if (createUser != null) {
@@ -103,6 +107,8 @@ public class UserEndpoints {
     User user = new Gson().fromJson(body, User.class);
 
     String token = userController.login(user);
+    //Adding encryption to the output
+    token = Encryption.encryptDecryptXOR(token);
 
     try{
       if (token != null) {
@@ -119,24 +125,6 @@ public class UserEndpoints {
   }
 
   // TODO: Make the system able to delete users - FIXED
-  /*
-  @POST
-  @Path("/delete/{delete}/{token}")
-  public Response deleteUser(@PathParam("delete") int idToDelete) {
-
-    int result = UserController.deleteUser(idToDelete);
-
-    userCache.getUsers(true);
-
-    //Problematik da vi laver et database kald, vi burde i stedet
-    if(result == 1) {
-      return Response.status(200).entity("User ID " + idToDelete + "was deleted").build();
-    } else {
-      return Response.status(400).entity("Could not delete user").build();
-    }
-
-  }
-  */
 
   @POST
   @Path("/delete/{token}")
@@ -156,6 +144,10 @@ public class UserEndpoints {
     }
 
     int id = jwt.getClaim("userId").asInt();
+    String response = "User ID " + id + " was deleted";
+    //Adding encryption
+    response = Encryption.encryptDecryptXOR(response);
+
 
     //Problematik da vi laver et database kald, vi burde i stedet
     if(userWasDeleted == true) {
@@ -178,20 +170,9 @@ public class UserEndpoints {
 
     User updatedUser = userController.update(user, token);
 
-    /*
-    try{
-      if (token != null) {
-        return Response.status(200).type(MediaType.APPLICATION_JSON_TYPE).entity(token).build();
-      } else {
-        return Response.status(400).entity("Could not update").build();
-      }
-
-    } catch(Exception e) {
-      System.out.println("Error: " + e.getMessage());
-    }
-    */
-
     String json = new Gson().toJson(updatedUser);
+    //Adding encryption
+    json = Encryption.encryptDecryptXOR(json);
 
     // Return the data to the user
     if (updatedUser != null) {

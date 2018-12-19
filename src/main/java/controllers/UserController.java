@@ -162,15 +162,11 @@ public class UserController {
 
 
         // Build the query for DB
-       // String sql = "SELECT * FROM user WHERE email= '" + user.getEmail() + "' AND password='" + Hashing.sha(user.getPassword()) + "'";
-        String sql = "SELECT * FROM user WHERE email='" + user.getEmail() + "'";
-        // select from user wnere id = 1;
-        // select from user where email = 'test@example.com' AND
+          String sql = "SELECT * FROM user WHERE email='" + user.getEmail() + "'";
 
         ResultSet rs = dbCon.query(sql);
         User loginUser = null;
 
-        //hashing.setLoginSalt(String.valueOf(System.currentTimeMillis() / 1000L));
 
         try {
             // Get first object, since we only have one
@@ -197,7 +193,6 @@ public class UserController {
                 }
 
                 Log.writeLog(UserController.class.getName(), user, "User actually logged in", 0);
-               // return hashing.hashTokenWithSalt(token);     Hashet token
                 return token;
                 } else {
                     System.out.println("Wrong username or password");
@@ -220,7 +215,6 @@ public class UserController {
 
         DecodedJWT jwt = null;
         try {
-            //DecodedJWT jwt = JWT.decode(token);
             jwt = JWT.decode(token);
 
         } catch (JWTDecodeException exception) {
@@ -252,7 +246,6 @@ public class UserController {
         DecodedJWT jwt = null;
         Hashing hashing = new Hashing();
         try {
-            //DecodedJWT jwt = JWT.decode(token);
             jwt = JWT.decode(token);
 
         } catch (JWTDecodeException exception) {

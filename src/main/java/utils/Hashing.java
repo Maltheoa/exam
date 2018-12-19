@@ -9,7 +9,6 @@ import org.bouncycastle.util.encoders.Hex;
 
 public final class Hashing {
 
-  private String loginSalt;
   private String passwordSalt;
 
   // TODO: You should add a salt and make this secure - FIXED
@@ -66,27 +65,14 @@ public final class Hashing {
     return rawString;
   }
 
-  public void setLoginSalt(String loginSalt) {this.loginSalt = loginSalt;}
   public void setPasswordSalt(String passwordSalt) {this.passwordSalt = passwordSalt;}
 
-  public String hashTokenWithSalt(String str) {
-
-    String salt = str+this.loginSalt;
-
-    return sha(salt);
-  }
 
   public String hashPasswordWithSalt(String str) {
-
+    //Adding local salt variable and supplied string together
     String saltedString = str+this.passwordSalt;
-
+    //Hashing and then returning the "saltedString"
     return sha(saltedString);
   }
 
-  public String hashPasswordWithUnSetSalt(String salt, String password) {
-
-    String saltedPassword = sha(salt+password);
-
-    return  saltedPassword;
-  }
 }
