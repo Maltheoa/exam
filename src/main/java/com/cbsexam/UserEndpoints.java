@@ -107,8 +107,7 @@ public class UserEndpoints {
     User user = new Gson().fromJson(body, User.class);
 
     String token = userController.login(user);
-    //Adding encryption to the output
-    token = Encryption.encryptDecryptXOR(token);
+
 
     try{
       if (token != null) {
@@ -151,7 +150,7 @@ public class UserEndpoints {
 
     //Problematik da vi laver et database kald, vi burde i stedet
     if(userWasDeleted == true) {
-      return Response.status(200).entity("User ID " + id + " was deleted").build();
+      return Response.status(200).entity(MediaType.APPLICATION_JSON_TYPE).entity(response).build();
     } else {
       return Response.status(400).entity("Could not delete user").build();
     }
